@@ -188,5 +188,58 @@ SHOW TABLES;
 
 
 
+### Inserts
+
+```sql
+INSERT INTO empleado VALUES (1,'Mike','Hillyer',3,NULL, 'mike@sakilastaff.com', 2, 1, 'Mike', NULL, '2006-02-15 03:57:16'),
+(2,'Jon','Stephens',4,NULL,'Jon.Stephens@sakilastaff.com',2,1,'Jon',NULL,'2006-02-15 03:57:16'),
+(3,'Pepe','Spilberg',5,NULL,'pepe.spilberg@sakilastaff.com',2,1,'Pepe',NULL,'2006-02-15 03:57:16'),
+(4,'Ada','Byron',6,NULL,'ada.byron@sakilastaff.com',1,1,'Ada',NULL,'2006-02-15 03:57:16'),
+(5,'Ringo','Rooksby',7,NULL,'ringo.rooksby@sakilastaff.com',1,1,'Ringo',NULL,'2006-02-15 03:57:16');
+COMMIT;
+
+SET AUTOCOMMIT=0;
+INSERT INTO almacen_empleado_jefe VALUES (2,2,'2006-02-15 04:57:12'),(1,5,'2006-02-15 04:57:12');
+COMMIT;
+```
+
+
+
+
+
 ### Consultas
+
+```sql
+-- CONSULTA 1
+
+SELECT c.id_cliente AS ID_Cliente, c.nombre AS Cliente, c.apellidos AS Apellido, COUNT(a.id_alquiler) AS Cantidad
+FROM cliente c
+JOIN alquiler a ON c.id_cliente = a.id_cliente
+WHERE a.fecha_alquiler >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+GROUP BY c.id_cliente
+ORDER BY Cantidad DESC
+LIMIT 1;
+
+-- CONSULTA 2
+
+SELECT p.titulo AS Pelicula, COUNT(a.id_alquiler) AS Total
+FROM alquiler a
+JOIN inventario i ON a.id_inventario = i.id_inventario
+JOIN pelicula p ON i.id_pelicula = p.id_pelicula
+WHERE a.fecha_alquiler >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY p.id_pelicula
+ORDER BY Total DESC
+LIMIT 5;
+
+-- Consulta 3
+
+SELECT cat.nombre AS Categoria, COUNT(a.id_alquiler) AS Total, SUM(pago.total) AS Ingresos
+FROM alquiler a
+JOIN pago pago ON a.id_alquiler = pago.id_alquiler
+JOIN inventario i ON a.id_inventario = i.id_inventario
+JOIN pelicula p ON i.id_pelicula = p.id_pelicula
+JOIN pelicula_categoria pc ON p.id_pelicula = pc.id_pelicula
+JOIN categoria cat ON pc.id_categoria = cat.id_categoria
+GROUP BY cat.id_categoria;
+```
 
