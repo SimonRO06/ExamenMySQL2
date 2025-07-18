@@ -191,12 +191,14 @@ SHOW TABLES;
 ### Inserts
 
 ```sql
-INSERT INTO empleado VALUES (1,'Mike','Hillyer',3,NULL, 'mike@sakilastaff.com', 2, 1, 'Mike', NULL, '2006-02-15 03:57:16'),
-(2,'Jon','Stephens',4,NULL,'Jon.Stephens@sakilastaff.com',2,1,'Jon',NULL,'2006-02-15 03:57:16'),
-(3,'Pepe','Spilberg',5,NULL,'pepe.spilberg@sakilastaff.com',2,1,'Pepe',NULL,'2006-02-15 03:57:16'),
-(4,'Ada','Byron',6,NULL,'ada.byron@sakilastaff.com',1,1,'Ada',NULL,'2006-02-15 03:57:16'),
-(5,'Ringo','Rooksby',7,NULL,'ringo.rooksby@sakilastaff.com',1,1,'Ringo',NULL,'2006-02-15 03:57:16');
+-- Le quite el id del empleado en jefe a la tabla de 'almacen' para que no ocurriera algun error a la hora de crear la tabla
+
+SET AUTOCOMMIT=0;
+INSERT INTO almacen VALUES (1,1,'2006-02-15 04:57:12'),
+(2,2,'2006-02-15 04:57:12');
 COMMIT;
+
+-- Cree una tabla para relacionar el almacen y el empleado en jefe de cada almacen
 
 SET AUTOCOMMIT=0;
 INSERT INTO almacen_empleado_jefe VALUES (2,2,'2006-02-15 04:57:12'),(1,5,'2006-02-15 04:57:12');
@@ -231,7 +233,7 @@ GROUP BY p.id_pelicula
 ORDER BY Total DESC
 LIMIT 5;
 
--- Consulta 3
+-- CONSULTA 3
 
 SELECT cat.nombre AS Categoria, COUNT(a.id_alquiler) AS Total, SUM(pago.total) AS Ingresos
 FROM alquiler a
@@ -241,5 +243,134 @@ JOIN pelicula p ON i.id_pelicula = p.id_pelicula
 JOIN pelicula_categoria pc ON p.id_pelicula = pc.id_pelicula
 JOIN categoria cat ON pc.id_categoria = cat.id_categoria
 GROUP BY cat.id_categoria;
+
+-- CONSULTA 4
+
+
+
+-- CONSULTA 5
+
+
+
+-- CONSULTA 6
+
+SELECT ciu.nombre AS Ciudad, COUNT(DISTINCT c.id_cliente) AS Clientes
+FROM cliente c
+JOIN direccion d ON c.id_direccion = d.id_direccion
+JOIN ciudad ciu ON d.id_ciudad = ciu.id_ciudad
+JOIN alquiler a ON c.id_cliente = a.id_cliente
+WHERE a.fecha_alquiler >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+GROUP BY ciu.id_ciudad
+ORDER BY Clientes DESC
+LIMIT 3;
+
+-- CONSULTA 7
+
+
+
+-- CONSULTA 8
+
+SELECT AVG(DATEDIFF(fecha_devolucion, fecha_alquiler)) AS promedio_dias
+FROM alquiler
+WHERE fecha_devolucion IS NOT NULL;
+
+-- CONSULTA 9
+
+SELECT e.id_empleado AS ID_Empleado, e.nombre AS Empleado, e.apellidos AS Apellido, COUNT(a.id_alquiler) AS Alquileres
+FROM alquiler a
+JOIN empleado e ON a.id_empleado = e.id_empleado
+JOIN inventario i ON a.id_inventario = i.id_inventario
+JOIN pelicula p ON i.id_pelicula = p.id_pelicula
+JOIN pelicula_categoria pc ON p.id_pelicula = pc.id_pelicula
+JOIN ategoria cat ON pc.id_categoria = cat.id_categoria
+WHERE cat.nombre = 'Acción'
+GROUP BY e.id_empleado
+ORDER BY Alquileres DESC
+LIMIT 5;
+
+-- CONSULTA 10
+
+SELECT c.id_cliente AS ID_Cliente, c.nombre AS Cliente, c.apellidos AS Apellido, COUNT(a.id_alquiler) AS Alquileres, MAX(a.fecha_alquiler) AS Ultima_Vez, MIN(a.fecha_alquiler) AS Primera_Vez
+FROM cliente c
+JOIN alquiler a ON c.id_cliente = a.id_cliente
+GROUP BY c.id_cliente
+ORDER BY Alquileres DESC
+LIMIT 10;
+
+-- CONSULTA 11
+
+SELECT i.id_idioma AS ID_Idioma, i.nombre AS Idioma, AVG(p.duracion_alquiler) AS Promedio
+FROM pelicula p
+JOIN idioma i ON p.id_idioma = i.id_idioma
+GROUP BY i.id_idioma, i.nombre;
+
+
+-- CONSULTA 12
+
+SELECT p.id_pelicula AS ID_Pelicula, p.titulo AS Pelicula, p.duracion AS Duracion, COUNT(a.id_alquiler) AS Alquileres
+FROM pelicula p
+JOIN inventario i ON p.id_pelicula = i.id_pelicula
+JOIN alquiler a ON i.id_inventario = a.id_inventario
+WHERE a.fecha_alquiler >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY p.id_pelicula, p.titulo, p.duracion
+ORDER BY p.duracion DESC
+LIMIT 5;
+
+-- CONSULTA 13
+
+SELECT c.id_cliente AS ID_Cliente, c.nombre AS Cliente, c.apellidos AS Apellido, COUNT(*) AS Total_Comedia
+FROM cliente c
+JOIN alquiler a ON c.id_cliente = a.id_cliente
+JOIN inventario i ON a.id_inventario = i.id_inventario
+JOIN pelicula_categoria pc ON i.id_pelicula = pc.id_pelicula
+JOIN categoria cat ON pc.id_categoria = cat.id_categoria
+WHERE cat.nombre = 'Comedia'
+GROUP BY c.id_cliente, c.nombre, c.apellidos
+ORDER BY Total_Comedia DESC;
+
+-- CONSULTA 14
+
+
+
+-- CONSULTA 15
+
+
+
+-- CONSULTA 16
+
+SELECT a.id_almacen AS ID_Almacen, SUM(p.total) AS ingresos
+FROM pago p
+JOIN alquiler alq ON p.id_alquiler = alq.id_alquiler
+JOIN inventario i ON alq.id_inventario = i.id_inventario
+JOIN almacen a ON i.id_almacen = a.id_almacen
+WHERE p.fecha_pago >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+GROUP BY a.id_almacen;
+
+-- CONSULTA 17
+
+SELECT c.id_cliente AS ID_Cliente, c.nombre AS Cliente, c.apellidos AS Apellido, p.total AS Monto
+FROM pago p
+JOIN cliente c ON p.id_cliente = c.id_cliente
+WHERE p.fecha_pago >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+ORDER BY p.total DESC
+LIMIT 1;
+
+-- CONSULTA 18
+
+
+
+-- CONSULTA 19
+
+SELECT idi.id_idioma AS ID_Idioma, idi.nombre AS Idioma, COUNT(*) AS total_alquileres
+FROM alquiler a
+JOIN inventario i ON a.id_inventario = i.id_inventario
+JOIN pelicula p ON i.id_pelicula = p.id_pelicula
+JOIN idioma idi ON p.id_idioma = idi.id_idioma
+WHERE a.fecha_alquiler >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+GROUP BY idi.id_idioma, idi.nombre;
+
+-- CONSULTA 20
+
+
 ```
 
